@@ -1,0 +1,39 @@
+service: webhooks-bl
+
+provider:
+  name: aws
+  region: eu-west-2
+  runtime: provided
+  iamRoleStatements:
+    # Allow to put a file in the `my-bucket` S3 bucket
+    - Effect: Allow
+      Action: s3:PutObject
+      Resource: 'arn:aws:s3:::my-bucket/*'
+  environment:
+    # Laravel environment variables
+    APP_STORAGE: '/tmp'
+
+plugins:
+  - ./vendor/bref/bref
+
+functions:
+  website:
+    handler: public/index.php
+    timeout: 28 # in seconds (API Gateway has a timeout of 29 seconds)
+    layers:
+      - ${bref:layer.php-74-fpm}
+    events:
+      -   http: 'ANY /'
+      -   http: 'ANY /{proxy+}'
+  artisan:
+    handler: artisan
+    timeout: 28 # in seconds
+    layers:
+      - ${bref:layer.php-74} # PHP
+      - ${bref:layer.console} # The "console" layer
+resources:
+  Resources:
+    MyBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: 'wh-bucket'

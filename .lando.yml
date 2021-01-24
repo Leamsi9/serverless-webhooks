@@ -1,0 +1,16 @@
+name: webhooks-client
+recipe: laravel
+config:
+  webroot: ./app/public
+  php: '7.4'
+  via: apache
+  database: mysql:5.7
+  xdebug: true
+env_file:
+  - .env
+tooling:
+  # automated testing shortcuts
+  phpunit:
+    description: Run PHPUnit tests only
+    cmd:
+      - appserver:  ./app/vendor/bin/phpunit  ./app/tests/
